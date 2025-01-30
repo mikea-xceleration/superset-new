@@ -1,3 +1,6 @@
 ﻿duckdb-engine==0.13.2
 duckdb==1.1.0
+PyJWT[crypto]==2.8.0
+cachetools==5.3.2
+requests==2.31.0
 

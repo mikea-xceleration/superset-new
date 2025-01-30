@@ -14,17 +14,14 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-from .utils.decorator import ImpersonationDecorator
+from .decorator import ImpersonationDecorator
+from .oidc import OIDCConfig
+from .token import TokenValidator, TokenValidationResult
 
+__all__ = [
+    'ImpersonationDecorator',
+    'OIDCConfig',
+    'TokenValidator',
+    'TokenValidationResult',
+]
 
-def impersonate(username: str):
-    """
-    Decorator that validates JWT token from OIDC server and impersonates a user.
-
-    This decorator expects the following Superset configurations:
-    - OIDC_ISSUER: The OIDC server URL
-
-    Args:
-        username: Username to impersonate
-    """
-    return ImpersonationDecorator(username)
