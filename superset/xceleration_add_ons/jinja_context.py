@@ -1,23 +1,27 @@
-﻿from typing import Optional
-from flask import has_request_context, request, session
-
-from superset import results_backend
+﻿from typing import Dict, Any, Optional
+from flask import session
+from markupsafe import escape
 
 
 def oauth_value(
     claim: str,
-    default: Optional[str] = None,
-    escape_result: bool = True,
+    escape_result: bool,
+    default: Optional[str] = None
 ) -> Optional[str]:
-    # pylint: disable=import-outside-toplevel
-
-    # if has_request_context() and request.args.get(param):
-    #     return request.args.get(param, default)
-    # 
-    
     result = session.get(claim)
     if result is None:
         result = default
-    
+
+    if result is not None and escape_result:
+        return escape(str(result))
+
     return result
-    # return "2472059"
+
+
+# Add this to your custom_jinja_context.py
+def xceleration_jinja_context() -> Dict[str, Any]:
+    context: Dict[str, Any] = {
+        'oauth_value': oauth_value
+    }
+
+    return context

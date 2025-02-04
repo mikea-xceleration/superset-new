@@ -188,7 +188,6 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
         from superset.views.sqllab import SqllabView
         from superset.views.tags import TagModelView, TagView
         from superset.views.users.api import CurrentUserRestApi, UserRestApi
-        from superset.xceleration_add_ons.api import XcelerationRestApi
 
         set_app_error_handlers(self.superset_app)
 
@@ -226,7 +225,6 @@ class SupersetAppInitializer:  # pylint: disable=too-many-public-methods
         appbuilder.add_api(SavedQueryRestApi)
         appbuilder.add_api(TagRestApi)
         appbuilder.add_api(SqlLabRestApi)
-        appbuilder.add_api(XcelerationRestApi)
         #
         # Setup regular views
         #

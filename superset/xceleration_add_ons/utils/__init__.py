@@ -14,12 +14,10 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-from .decorator import ImpersonationDecorator
 from .oidc import OIDCConfig
 from .token import TokenValidator, TokenValidationResult
 
 __all__ = [
-    'ImpersonationDecorator',
     'OIDCConfig',
     'TokenValidator',
     'TokenValidationResult',

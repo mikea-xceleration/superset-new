@@ -127,7 +127,7 @@ COPY --chown=superset:superset --from=superset-node /app/superset/static/assets 
 COPY --chown=superset:superset superset superset
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install -e .
-RUN pip install -r /app/superset/requirements.txt
+RUN pip install -r /app/superset/xceleration_add_ons/requirements.txt
 
 # Copy the .json translations from the frontend layer
 COPY --chown=superset:superset --from=superset-node /app/superset/translations superset/translations

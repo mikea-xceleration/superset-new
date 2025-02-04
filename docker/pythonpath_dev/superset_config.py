@@ -27,9 +27,20 @@ from celery.schedules import crontab
 from flask_appbuilder.const import AUTH_REMOTE_USER
 from flask_caching.backends.filesystemcache import FileSystemCache
 
-from superset.xceleration_add_ons.jinja_context import oauth_value
+from superset.xceleration_add_ons import xceleration_jinja_context, \
+    DualAuthSecurityManager, AuthMiddleware
 
 logger = logging.getLogger()
+
+# Xceleration custom add ons
+SQLALCHEMY_TRACK_MODIFICATIONS = False
+CUSTOM_SECURITY_MANAGER = DualAuthSecurityManager
+
+ADDITIONAL_MIDDLEWARE = [AuthMiddleware]
+
+JINJA_CONTEXT_ADDONS = xceleration_jinja_context()
+
+# end Xceleration custom add ons
 
 DATABASE_DIALECT = os.getenv("DATABASE_DIALECT")
 DATABASE_USER = os.getenv("DATABASE_USER")
@@ -102,12 +113,10 @@ CELERY_CONFIG = CeleryConfig
 
 FEATURE_FLAGS = {
     "ALERT_REPORTS": True,
-#    "EMBEDDED_SUPERSET": True,
+    #    "EMBEDDED_SUPERSET": True,
     "ENABLE_TEMPLATE_PROCESSING": True
 }
-JINJA_CONTEXT_ADDONS = {
-    "oauth_value" : oauth_value
-}
+
 TALISMAN_DEV_CONFIG = {
     "content_security_policy": {
         "base-uri": ["'self'"],
@@ -141,8 +150,7 @@ TALISMAN_DEV_CONFIG = {
 }
 ENABLE_CORS = True
 OVERRIDE_HTTP_HEADERS = {'X-Frame-Options': 'ALLOWALL'}
-HTTP_HEADERS = {"X-Frame-Options" : "ALLOWALL"}
-# CUSTOM_SECURITY_MANAGER = XcelerationSecurityManager
+HTTP_HEADERS = {"X-Frame-Options": "ALLOWALL"}
 # AUTH_TYPE = AUTH_REMOTE_USER
 ALERT_REPORTS_NOTIFICATION_DRY_RUN = True
 WEBDRIVER_BASEURL = "http://superset:8088/"  # When using docker compose baseurl should be http://superset_app:8088/
