@@ -27,10 +27,11 @@ class DualAuthSecurityManager(SupersetSecurityManager):
             response = self.token_validator.validate_token(token, request_id)
             if not response.is_valid:
                 return False
-            if not self.token_validator.validate_scope(response.decoded_token, request_id):
+            if not self.token_validator.validate_scope(response.decoded_token,
+                                                       request_id):
                 return False
-            guest_role = self.__get_or_create_guest_role(request_id)
-            guest_user = self.__get_or_create_guest_user(guest_role, request_id)
+            guest_role = self._get_or_create_guest_role(request_id)
+            guest_user = self._get_or_create_guest_user(guest_role, request_id)
 
             # Update last login
             guest_user.last_login = datetime.now()
@@ -38,7 +39,7 @@ class DualAuthSecurityManager(SupersetSecurityManager):
             self.get_session.commit()
 
             # self.update_user_auth_stat(guest_user)
-            self.__update_session(response.decoded_token)
+            self._update_session(response.decoded_token)
             # logout_user()
             login_user(guest_user, remember=False)
 
@@ -47,7 +48,7 @@ class DualAuthSecurityManager(SupersetSecurityManager):
             logger.error(f"Error in auth_jwt_login: {str(e)} [request_id={request_id}]")
             return False
 
-    def __get_or_create_guest_user(self, guest_role: Role, request_id: str) -> User:
+    def _get_or_create_guest_user(self, guest_role: Role, request_id: str) -> User:
         guest_user = self.find_user(username='guest')
         if not guest_user:
             logger.info(
@@ -65,7 +66,7 @@ class DualAuthSecurityManager(SupersetSecurityManager):
 
         return guest_user
 
-    def __get_or_create_guest_role(self, request_id: str) -> Role:
+    def _get_or_create_guest_role(self, request_id: str) -> Role:
         guest_role = self.find_role("Guest")
         if not guest_role:
             logger.info(
@@ -92,7 +93,7 @@ class DualAuthSecurityManager(SupersetSecurityManager):
 
         return guest_role
 
-    def __update_session(self, decoded_token: Dict[Any, Any]):
+    def _update_session(self, decoded_token: Dict[Any, Any]):
         """Updates session with token claims."""
         allowed_claims = ['clientId', 'userId', 'repTypeId', 'sub', 'email', 'name',
                           'given_name', 'family_name']
@@ -100,4 +101,3 @@ class DualAuthSecurityManager(SupersetSecurityManager):
             if claim in decoded_token:
                 logger.debug(f"Adding claim - {claim} to session")
                 session[claim] = decoded_token[claim]
-
