@@ -27,16 +27,14 @@ from celery.schedules import crontab
 from flask_appbuilder.const import AUTH_REMOTE_USER
 from flask_caching.backends.filesystemcache import FileSystemCache
 
-from superset.xceleration_add_ons import xceleration_jinja_context, \
-    DualAuthSecurityManager, AuthMiddleware
+from superset.xceleration_add_ons import xceleration_jinja_context
+from superset.xceleration_add_ons import BearerAuthSecurityManager
 
 logger = logging.getLogger()
 
 # Xceleration custom add ons
-SQLALCHEMY_TRACK_MODIFICATIONS = False
-CUSTOM_SECURITY_MANAGER = DualAuthSecurityManager
-
-ADDITIONAL_MIDDLEWARE = [AuthMiddleware]
+# SQLALCHEMY_TRACK_MODIFICATIONS = False
+CUSTOM_SECURITY_MANAGER = BearerAuthSecurityManager
 
 JINJA_CONTEXT_ADDONS = xceleration_jinja_context()
 

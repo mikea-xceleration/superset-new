@@ -14,13 +14,11 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-from .AuthMiddleware import AuthMiddleware
-from .DualAuthSecurityManager import DualAuthSecurityManager
+from .security_manager import BearerAuthSecurityManager
 from .jinja_context import xceleration_jinja_context
 
 __all__ = [
-    'AuthMiddleware',
-    'DualAuthSecurityManager',
+    'BearerAuthSecurityManager',
     'xceleration_jinja_context',
 ]
 
