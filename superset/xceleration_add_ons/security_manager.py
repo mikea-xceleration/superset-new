@@ -1,10 +1,11 @@
-﻿from superset.security import SupersetSecurityManager
-from flask_login import login_user
-from flask import session
+﻿from urllib.parse import urlparse, parse_qs
+
+from superset.security import SupersetSecurityManager
+from flask_login import login_user, logout_user
+from flask import session, request, g
 from flask_appbuilder.security.sqla.models import User, Role
 
-from superset.xceleration_add_ons.views import StandardAuthDbView
-from superset.xceleration_add_ons.api import BearerTokenApi
+from superset.xceleration_add_ons.views import DualAuthView
 
 import traceback
 import logging
@@ -18,18 +19,10 @@ class BearerAuthSecurityManager(SupersetSecurityManager):
     def __init__(self, *args, **kwargs):
         logger.info("Initializing BearerAuthSecurityManager")
         super().__init__(*args, **kwargs)
-        # self.authdbview = StandardAuthDbView
-        # self.authview = BearerTokenView
+        self.authdbview = DualAuthView
         self.oidc_config = OIDCConfig()
         self.token_validator = TokenValidator(self.oidc_config)
         logger.info("BearerAuthSecurityManager initialized")
-
-    def register_views(self) -> None:
-        super().register_views()
-        logger.info("Registering views")
-        self.appbuilder.add_view_no_menu(StandardAuthDbView)
-        self.appbuilder.add_api(BearerTokenApi)
-        logger.info("Views registered")
 
     def auth_jwt_login(self, token: str, request_id: str) -> bool:
         try:
@@ -49,8 +42,9 @@ class BearerAuthSecurityManager(SupersetSecurityManager):
                 logger.warning(f"User not found: [request_id]={request_id}")
                 return False
 
-            login_user(guest_user)
+            is_logged_in = login_user(guest_user)
 
+            logger.debug(f"User logged in: {is_logged_in}")
             for key, value in response.decoded_token.items():
                 session[key] = value
                 logger.debug(f"Adding claim - {key} to session")
@@ -116,3 +110,6 @@ class BearerAuthSecurityManager(SupersetSecurityManager):
                     )
 
         return guest_role
+
+
+

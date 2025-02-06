@@ -16,9 +16,11 @@
 # under the License.
 from .security_manager import BearerAuthSecurityManager
 from .jinja_context import xceleration_jinja_context
+from .middleware import TokenAuthMiddleware
 
 __all__ = [
     'BearerAuthSecurityManager',
+    'TokenAuthMiddleware',
     'xceleration_jinja_context',
 ]
 
