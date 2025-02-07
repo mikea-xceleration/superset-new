@@ -16,10 +16,12 @@
 # under the License.
 from .oidc import OIDCConfig
 from .token import TokenValidator, TokenValidationResult
+from .helper import extract_token_from_request
 
 __all__ = [
     'OIDCConfig',
     'TokenValidator',
     'TokenValidationResult',
+    "extract_token_from_request"
 ]
 
