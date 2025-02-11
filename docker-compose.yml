@@ -33,6 +33,7 @@ x-superset-volumes: &superset-volumes
   - superset_home:/app/superset_home
   - ./tests:/app/tests
   - ./Data:/app/S3/parquet/files
+  - D:\SuperSetPlugins\plugin-chart-table-no-data:/app/plugin-chart-table-no-data
 
 x-common-build: &common-build
   context: .

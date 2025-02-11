@@ -1,1 +1,4 @@
 v20.16.0
+always-auth=true
+registry=https://registry.npmjs.org/
+@xceleration:registry=https://xceleration-886004726701.d.codeartifact.us-east-1.amazonaws.com/npm/npm-rewardstation-public/

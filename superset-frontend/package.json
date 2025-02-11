@@ -80,6 +80,7 @@
     "last 3 edge versions"
   ],
   "dependencies": {
+    "plugin-chart-table-no-data" : "1.0.0",
     "@ant-design/icons": "^5.2.6",
     "@emotion/cache": "^11.4.0",
     "@emotion/react": "^11.4.1",

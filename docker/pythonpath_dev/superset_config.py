@@ -40,6 +40,7 @@ CUSTOM_SECURITY_MANAGER = BearerAuthSecurityManager
 
 JINJA_CONTEXT_ADDONS = xceleration_jinja_context()
 ADDITIONAL_MIDDLEWARE = [TokenAuthMiddleware] + ADDITIONAL_MIDDLEWARE
+CUSTOM_CHART_PLUGINS = ['plugin-chart-table-no-data']
 
 # end Xceleration custom add ons
 

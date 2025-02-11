@@ -25,7 +25,15 @@ fi
 
 if [ "$BUILD_SUPERSET_FRONTEND_IN_DOCKER" = "true" ]; then
     echo "Building Superset frontend in dev mode inside docker container"
+
+    # Build the plugin first
+    echo "Building plugin-chart-table-no-data"
+    cd /app/plugin-chart-table-no-data
+    npm install
+    npm run build
+
     cd /app/superset-frontend
+    npm link /app/plugin-chart-table-no-data
 
     echo "Running `npm install`"
     npm install

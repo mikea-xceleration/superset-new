@@ -47,10 +47,10 @@ class BearerAuthSecurityManager(SupersetSecurityManager):
             logger.debug(f"Guest user logged in: {is_logged_in}")
 
             # Extract decoded token to handle claims
-            decoded_token = validation_result.decoded_token
-            for key, value in decoded_token.items():
-                session[key] = value
-                logger.debug(f"Adding claim - {key} to session")
+            # decoded_token = validation_result.decoded_token
+            # for key, value in decoded_token.items():
+            #     session[key] = value
+            #     logger.debug(f"Adding claim - {key} to session")
 
             logger.info(
                 "Bearer token authenticated successfully: "
