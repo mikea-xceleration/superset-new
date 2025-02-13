@@ -41,7 +41,6 @@ _images
 _modules
 _static
 build
-Data/
 app.db
 apache_superset.egg-info/
 changelog.sh
@@ -123,3 +122,4 @@ docker/*local*
 # Jest test report
 test-report.html
 superset/static/stats/statistics.html
+/Data/
