@@ -458,13 +458,16 @@ class DatabricksNativeEngineSpec(DatabricksDynamicBaseEngineSpec):
     @classmethod
     def get_prequeries(
         cls,
+        database: Database,
         catalog: str | None = None,
         schema: str | None = None,
     ) -> list[str]:
         prequeries = []
         if catalog:
+            catalog = f"`{catalog}`" if not catalog.startswith("`") else catalog
             prequeries.append(f"USE CATALOG {catalog}")
         if schema:
+            schema = f"`{schema}`" if not schema.startswith("`") else schema
             prequeries.append(f"USE SCHEMA {schema}")
         return prequeries
 

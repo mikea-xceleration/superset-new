@@ -1,6 +1,6 @@
 ﻿import React, { Suspense } from 'react';
 import {EmptyStateContainer} from '../Styles';
-import { EmptyStateTableProps } from '../../types';
+import {  EmptyStateTableTransformedProps } from '../../types';
 import TableChartPlugin from '@superset-ui/plugin-chart-table';
 
 // Lazy load the base chart
@@ -11,22 +11,20 @@ const BaseChart = React.lazy(async () => {
   return {default: Component};
 });
 
-const  EmptyStateTable: React.FC<EmptyStateTableProps> = props =>{
-  const { queriesData, ...rest } = props;
-  const response = queriesData[0];
+const  EmptyStateTable: React.FC<EmptyStateTableTransformedProps> = props =>{
+  const { isEmpty, emptyStateMessage, ...rest } = props;
  
-  const hasNoData = !response?.data || response.data.length === 0;
   
-  if (hasNoData) {
+  if (isEmpty) {
     return (
       <EmptyStateContainer className="dt-empty-state">
-        {rest.formData?.empty_state_message || 'No results found'}
+        {emptyStateMessage || 'No results found'}
       </EmptyStateContainer>
     );    
   }
   return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <BaseChart {...rest} queriesData={queriesData} />
+    <Suspense fallback={<div></div>}>
+      <BaseChart {...rest} />
     </Suspense>
   );
 };

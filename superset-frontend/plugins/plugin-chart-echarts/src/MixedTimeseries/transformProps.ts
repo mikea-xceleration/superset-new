@@ -27,6 +27,7 @@ import {
   ensureIsArray,
   GenericDataType,
   getCustomFormatter,
+  getMetricLabel,
   getNumberFormatter,
   getXAxisLabel,
   isDefined,
@@ -62,6 +63,7 @@ import {
   extractDataTotalValues,
   extractSeries,
   extractShowValueIndexes,
+  extractTooltipKeys,
   getAxisType,
   getColtypesMapping,
   getLegendProps,
@@ -77,6 +79,7 @@ import {
   extractForecastValuesFromTooltipParams,
   formatForecastTooltipSeries,
   rebaseForecastDatum,
+  reorderForecastSeries,
 } from '../utils/forecast';
 import { convertInteger } from '../utils/convertInteger';
 import { defaultGrid, defaultYAxis } from '../defaults';
@@ -151,6 +154,7 @@ export default function transformProps(
     areaB,
     annotationLayers,
     colorScheme,
+    timeShiftColor,
     contributionMode,
     legendOrientation,
     legendType,
@@ -288,12 +292,20 @@ export default function transformProps(
   const showValueIndexesB = extractShowValueIndexes(rawSeriesB, {
     stack,
   });
+
+  const metricsLabels = metrics
+    .map(metric => getMetricLabel(metric, undefined, undefined, verboseMap))
+    .filter((label): label is string => label !== undefined);
+  const metricsLabelsB = metricsB.map((metric: QueryFormMetric) =>
+    getMetricLabel(metric, undefined, undefined, verboseMap),
+  );
+
   const { totalStackedValues, thresholdValues } = extractDataTotalValues(
     rebasedDataA,
     {
       stack,
       percentageThreshold,
-      xAxisCol: xAxisLabel,
+      metricsLabels,
     },
   );
   const {
@@ -302,7 +314,7 @@ export default function transformProps(
   } = extractDataTotalValues(rebasedDataB, {
     stack: Boolean(stackB),
     percentageThreshold,
-    xAxisCol: xAxisLabel,
+    metricsLabels: metricsLabelsB,
   });
 
   annotationLayers
@@ -406,6 +418,7 @@ export default function transformProps(
         showValueIndexes: showValueIndexesA,
         totalStackedValues,
         thresholdValues,
+        timeShiftColor,
       },
     );
     if (transformedSeries) series.push(transformedSeries);
@@ -455,6 +468,7 @@ export default function transformProps(
         showValueIndexes: showValueIndexesB,
         totalStackedValues: totalStackedValuesB,
         thresholdValues: thresholdValuesB,
+        timeShiftColor,
       },
     );
     if (transformedSeries) series.push(transformedSeries);
@@ -513,7 +527,9 @@ export default function transformProps(
       minorTick: { show: minorTicks },
       minInterval:
         xAxisType === AxisType.Time && timeGrainSqla
-          ? TIMEGRAIN_TO_TIMESTAMP[timeGrainSqla]
+          ? TIMEGRAIN_TO_TIMESTAMP[
+              timeGrainSqla as keyof typeof TIMEGRAIN_TO_TIMESTAMP
+            ]
           : 0,
       ...getMinAndMaxFromBounds(
         xAxisType,
@@ -581,55 +597,61 @@ export default function transformProps(
           : params.value[0];
         const forecastValue: any[] = richTooltip ? params : [params];
 
-        if (richTooltip && tooltipSortByMetric) {
-          forecastValue.sort((a, b) => b.data[1] - a.data[1]);
-        }
+        const sortedKeys = extractTooltipKeys(
+          forecastValue,
+          // horizontal mode is not supported in mixed series chart
+          1,
+          richTooltip,
+          tooltipSortByMetric,
+        );
 
         const rows: string[][] = [];
         const forecastValues =
           extractForecastValuesFromTooltipParams(forecastValue);
 
         const keys = Object.keys(forecastValues);
-        keys.forEach(key => {
-          const value = forecastValues[key];
-          // if there are no dimensions, key is a verbose name of a metric,
-          // otherwise it is a comma separated string where the first part is metric name
-          let formatterKey;
-          if (primarySeries.has(key)) {
-            formatterKey =
-              groupby.length === 0 ? inverted[key] : labelMap[key]?.[0];
-          } else {
-            formatterKey =
-              groupbyB.length === 0 ? inverted[key] : labelMapB[key]?.[0];
-          }
-          const tooltipFormatter = getFormatter(
-            customFormatters,
-            formatter,
-            metrics,
-            formatterKey,
-            !!contributionMode,
-          );
-          const tooltipFormatterSecondary = getFormatter(
-            customFormattersSecondary,
-            formatterSecondary,
-            metricsB,
-            formatterKey,
-            !!contributionMode,
-          );
-          const row = formatForecastTooltipSeries({
-            ...value,
-            seriesName: key,
-            formatter: primarySeries.has(key)
-              ? tooltipFormatter
-              : tooltipFormatterSecondary,
+        let focusedRow;
+        sortedKeys
+          .filter(key => keys.includes(key))
+          .forEach(key => {
+            const value = forecastValues[key];
+            // if there are no dimensions, key is a verbose name of a metric,
+            // otherwise it is a comma separated string where the first part is metric name
+            let formatterKey;
+            if (primarySeries.has(key)) {
+              formatterKey =
+                groupby.length === 0 ? inverted[key] : labelMap[key]?.[0];
+            } else {
+              formatterKey =
+                groupbyB.length === 0 ? inverted[key] : labelMapB[key]?.[0];
+            }
+            const tooltipFormatter = getFormatter(
+              customFormatters,
+              formatter,
+              metrics,
+              formatterKey,
+              !!contributionMode,
+            );
+            const tooltipFormatterSecondary = getFormatter(
+              customFormattersSecondary,
+              formatterSecondary,
+              metricsB,
+              formatterKey,
+              !!contributionMode,
+            );
+            const row = formatForecastTooltipSeries({
+              ...value,
+              seriesName: key,
+              formatter: primarySeries.has(key)
+                ? tooltipFormatter
+                : tooltipFormatterSecondary,
+            });
+            rows.push(row);
+            if (key === focusedSeries) {
+              focusedRow = rows.length - 1;
+            }
           });
-          rows.push(row);
-        });
-        return tooltipHtml(
-          rows,
-          tooltipFormatter(xValue),
-          keys.findIndex(key => key === focusedSeries),
-        );
+        return tooltipHtml(rows, tooltipFormatter(xValue), focusedRow);
       },
     },
     legend: {
@@ -651,7 +673,7 @@ export default function transformProps(
         .map(entry => entry.name || '')
         .concat(extractAnnotationLabels(annotationLayers, annotationData)),
     },
-    series: dedupSeries(series),
+    series: dedupSeries(reorderForecastSeries(series) as SeriesOption[]),
     toolbox: {
       show: zoomable,
       top: TIMESERIES_CONSTANTS.toolboxTop,

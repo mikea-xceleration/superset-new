@@ -1,4 +1,4 @@
-﻿{
+{
   "name": "@superset-ui/plugin-chart-table-no-data",
   "version": "1.0.0",
   "description": "Superset Chart - Table with Empty State",
@@ -12,7 +12,8 @@
   "scripts": {
     "build": "npm run build-cjs && npm run build-esm",
     "build-cjs": "tsc -p tsconfig.json",
-    "build-esm": "tsc -p tsconfig.esm.json"
+    "build-esm": "tsc -p tsconfig.esm.json",
+    "dev": "webpack serve --config webpack.config.dev.js"
   },
   "repository": {
     "type": "git",
@@ -22,14 +23,19 @@
     "superset"
   ],
   "license": "Apache-2.0",
-  "dependencies": {
-    "@superset-ui/plugin-chart-table": "*"
-  },
   "peerDependencies": {
-    "@superset-ui/core": "*",
     "@superset-ui/chart-controls": "*",
+    "@superset-ui/core": "*",
     "@superset-ui/plugin-chart-table": "*",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1"
+    "antd": "^4.10.3",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2"
+  },
+  "dependencies": {
+    "bignumber.js": "^9.0.0",
+    "json-bigint": "^1.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

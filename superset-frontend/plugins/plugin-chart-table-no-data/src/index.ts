@@ -1,6 +1,10 @@
-﻿import TableChartPlugin from '@superset-ui/plugin-chart-table';
-import { Behavior, ChartMetadata, t } from '@superset-ui/core';
+﻿import { Behavior, ChartMetadata, ChartPlugin, t } from '@superset-ui/core';
+import controlPanel from './plugin/controlPanel';
 import thumbnail from './images/thumbnail.png';
+import { EmptyStateTableChartFormData, EmptyStateTableProps } from './types';
+import transformProps from './plugin/transformProps';
+import { BasePluginUtils } from './plugin/utils/BasePluginUtils';
+import buildQuery from './plugin/buildQuery';
 
 const metadata = new ChartMetadata({
   behaviors: [Behavior.InteractiveChart],
@@ -9,14 +13,25 @@ const metadata = new ChartMetadata({
   name: t('Table with Empty State'),
   thumbnail,
   tags: [t('Tabular'), t('Report')],
+  enableNoResults: false
 });
-
-export default class TableNoDataPlugin extends TableChartPlugin {
+export default class TableNoDataPlugin extends ChartPlugin<
+  EmptyStateTableChartFormData,
+  EmptyStateTableProps
+> {
   constructor() {
-    super();
-    this.metadata = metadata;
-
-    this.loadChart = () => import('./plugin/components/EmptyStateTable')
-      .then(module => module.default);
+    BasePluginUtils.Initialize();
+    super({
+      loadChart: () => import('./plugin/components/EmptyStateTable'),
+      metadata,
+      // transformProps,
+      loadTransformProps: () => chartProps =>{
+        return transformProps(chartProps);
+      },
+      controlPanel,
+      buildQuery: buildQuery,
+    });
   }
 }
+
+

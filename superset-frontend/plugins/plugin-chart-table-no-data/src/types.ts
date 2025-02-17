@@ -1,12 +1,18 @@
 ﻿// src/types.ts
-import {
-  TableChartProps,
-} from '@superset-ui/plugin-chart-table';
+import { TableChartFormData, TableChartProps, TableChartTransformedProps } from '@superset-ui/plugin-chart-table';
 
-export interface EmptyStateTableProps extends TableChartProps
-{
+export interface EmptyStateTableProps extends TableChartProps {
+  rawFormData: EmptyStateTableChartFormData
+}
+
+export type EmptyStateTableChartFormData = TableChartFormData & {
+  empty_state_message?: string;
+}
+
+export interface EmptyStateTableTransformedProps extends TableChartTransformedProps {
+  isEmpty: boolean;
   emptyStateMessage?: string;
 }
 
 // Re-export base table types for convenience
-export { TableChartProps };
+export { TableChartProps, TableChartTransformedProps };

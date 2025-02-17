@@ -22,27 +22,24 @@
 #
 import logging
 import os
+import sys
 
 from celery.schedules import crontab
-from flask_appbuilder.const import AUTH_REMOTE_USER
 from flask_caching.backends.filesystemcache import FileSystemCache
 
-from superset.config import ADDITIONAL_MIDDLEWARE
-from superset.xceleration_add_ons import (xceleration_jinja_context,
-                                          TokenAuthMiddleware,
-                                          BearerAuthSecurityManager)
+from superset.xceleration_add_ons import BearerAuthSecurityManager, \
+    xceleration_jinja_context, TokenAuthMiddleware
 
 logger = logging.getLogger()
 
 # Xceleration custom add ons
-# SQLALCHEMY_TRACK_MODIFICATIONS = False
+
 CUSTOM_SECURITY_MANAGER = BearerAuthSecurityManager
-
 JINJA_CONTEXT_ADDONS = xceleration_jinja_context()
-ADDITIONAL_MIDDLEWARE = [TokenAuthMiddleware] + ADDITIONAL_MIDDLEWARE
-CUSTOM_CHART_PLUGINS = ['plugin-chart-table-no-data']
+ADDITIONAL_MIDDLEWARE = [TokenAuthMiddleware]
+ENABLE_CORS = True
 
-# end Xceleration custom add ons
+######################
 
 DATABASE_DIALECT = os.getenv("DATABASE_DIALECT")
 DATABASE_USER = os.getenv("DATABASE_USER")
@@ -113,52 +110,27 @@ class CeleryConfig:
 
 CELERY_CONFIG = CeleryConfig
 
-FEATURE_FLAGS = {
-    "ALERT_REPORTS": True,
-    #    "EMBEDDED_SUPERSET": True,
-    "ENABLE_TEMPLATE_PROCESSING": True
-}
-
-TALISMAN_DEV_CONFIG = {
-    "content_security_policy": {
-        "base-uri": ["'self'"],
-        "default-src": ["'self'"],
-        "img-src": [
-            "'self'",
-            "blob:",
-            "data:",
-            "https://apachesuperset.gateway.scarf.sh",
-            "https://static.scarf.sh/",
-            "https://avatars.slack-edge.com",
-        ],
-        "worker-src": ["'self'", "blob:"],
-        "connect-src": [
-            "'self'",
-            "https://api.mapbox.com",
-            "https://events.mapbox.com",
-        ],
-        "object-src": "'none'",
-        "style-src": [
-            "'self'",
-            "'unsafe-inline'",
-        ],
-        "script-src": ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
-    },
-    "frame_options": "ALLOWFROM",
-    "frame_options_allow_from": "localhost:3000",
-    "content_security_policy_nonce_in": ["script-src"],
-    "force_https": False,
-    "session_cookie_secure": False,
-}
-ENABLE_CORS = True
-OVERRIDE_HTTP_HEADERS = {'X-Frame-Options': 'ALLOWALL'}
-HTTP_HEADERS = {"X-Frame-Options": "ALLOWALL"}
-# AUTH_TYPE = AUTH_REMOTE_USER
+FEATURE_FLAGS = {"ALERT_REPORTS": True}
 ALERT_REPORTS_NOTIFICATION_DRY_RUN = True
-WEBDRIVER_BASEURL = "http://superset:8088/"  # When using docker compose baseurl should be http://superset_app:8088/
+WEBDRIVER_BASEURL = "http://superset:8088/"  # When using docker compose baseurl should be http://superset_app:8088/  # noqa: E501
 # The base URL for the email report hyperlinks.
 WEBDRIVER_BASEURL_USER_FRIENDLY = WEBDRIVER_BASEURL
 SQLLAB_CTAS_NO_LIMIT = True
+
+log_level_text = os.getenv("SUPERSET_LOG_LEVEL", "INFO")
+LOG_LEVEL = getattr(logging, log_level_text.upper(), logging.INFO)
+
+if os.getenv("CYPRESS_CONFIG") == "true":
+    # When running the service as a cypress backend, we need to import the config
+    # located @ tests/integration_tests/superset_test_config.py
+    base_dir = os.path.dirname(__file__)
+    module_folder = os.path.abspath(
+        os.path.join(base_dir, "../../tests/integration_tests/")
+    )
+    sys.path.insert(0, module_folder)
+    from superset_test_config import *  # noqa
+
+    sys.path.pop(0)
 
 #
 # Optionally import superset_config_docker.py (which will have been included on

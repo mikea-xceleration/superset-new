@@ -34,7 +34,6 @@ import RoseChartPlugin from '@superset-ui/legacy-plugin-chart-rose';
 import TableChartPlugin from '@superset-ui/plugin-chart-table';
 import { WordCloudChartPlugin } from '@superset-ui/plugin-chart-word-cloud';
 import WorldMapChartPlugin from '@superset-ui/legacy-plugin-chart-world-map';
-import TableChartNoDataPlugin from '@superset-ui/plugin-chart-table-no-data';
 import {
   BubbleChartPlugin,
   BulletChartPlugin,
@@ -81,6 +80,7 @@ import { PivotTableChartPlugin as PivotTableChartPluginV2 } from '@superset-ui/p
 import { HandlebarsChartPlugin } from '@superset-ui/plugin-chart-handlebars';
 import { FilterPlugins } from 'src/constants';
 import TimeTableChartPlugin from '../TimeTable';
+import TableChartNoData from '@superset-ui/plugin-chart-table-no-data'
 
 export default class MainPreset extends Preset {
   constructor() {
@@ -98,7 +98,7 @@ export default class MainPreset extends Preset {
       name: 'Legacy charts',
       presets: [new DeckGLChartPreset()],
       plugins: [
-        new TableChartNoDataPlugin().configure({ key: "table-chart-no-data" }),
+        new TableChartNoData().configure({key: "table_no_data"}),
         new BigNumberChartPlugin().configure({ key: VizType.BigNumber }),
         new BigNumberTotalChartPlugin().configure({
           key: VizType.BigNumberTotal,
